@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang=ts>
 import { useDraggable } from 'vue-draggable-plus'
 import {useInventoryStore} from "../store/MainStore.js"
 import {ref,onMounted,watch} from "vue"
@@ -6,70 +6,136 @@ import DeleteElemScreen from "./DeleteElemScreen.vue"
 
 const store = useInventoryStore()
 const el = ref(null)
-const currentData = ref([])
+const currentData = ref<Item[]>([])
+
+interface Item {
+  id: number
+  content: string
+}
 
 
 
-const draggable = useDraggable(el, currentData, {
+useDraggable(el, currentData, {
   animation: 150,
   onStart() {
     console.log('start')
   },
   onUpdate() {
-    console.log("update", currentData.value)
-    localStorage.setItem("inventoryData", JSON.stringify(currentData.value))
     
   }
 })
+function changeColors() {
+  store.changeTheme()
+}
+
+function setCurrentItem(item:Item) {
+  if (item) {
+    store.currentElement = item;
+  } else {
+    store.currentElement = null;
+  }
+}
 
 watch(() => store.inventoryData, (newData) => {
   currentData.value = newData;
+  
 });
+
+watch(()=>currentData.value, (newData) =>{
+  store.inventoryData = newData
+  localStorage.setItem("inventoryData", JSON.stringify(newData))
+}
+)
+
+
 
 
 onMounted(() => {
-  const data = JSON.parse(localStorage.getItem("inventoryData"))
-  console.log('onMounted', data)
+  const dataStr = localStorage.getItem("inventoryData")
+  const data = dataStr ? JSON.parse(dataStr) : null
+  const localColorStateStr = localStorage.getItem("colorState")
+  const localColorState = localColorStateStr ? JSON.parse(localColorStateStr) : null
   if (data) {
-    console.log('inside')
     currentData.value = data
   } else {
     currentData.value = store.inventoryData
   }
+  if(localColorState){
+    store.colorState = localColorState
+    console.log(store.colorState);
+    changeColors()
+  }
+  
 })
+
+
 
 </script>
 
 
 <template>
-       <div ref="el" class="inventory">
+       <div
+       
+       ref="el" class="inventory">
         <div class="item" v-for="item  in currentData" :key="item.id">
         
-        <img :src="item.content" alt="">
-        
+        <img @click="setCurrentItem(item)" :src="item.content" alt="">
+        <div v-if="item.content"
+        class="inventoryNumber"
+        >{{ item.id }}</div>
         </div>
-        <DeleteElemScreen/>
+        <Transition name="slide-fade">
+          <DeleteElemScreen v-if="store.currentElement"/>
+        </Transition>
+        
         </div>
 </template>
 
 
 
 <style lang="scss">
+.slide-fade-enter-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-fade-leave-active {
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
+}
+
+.slide-fade-enter-from,
+.slide-fade-leave-to {
+  transform: translateX(350px);
+  opacity: 0;
+}
 .inventory{
   position: relative;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     grid-template-rows: repeat(5, 1fr);
-    background-color: rgb(255,255,255,0.1);
+    background-color: var(--bg-color);
     box-sizing: border-box;
     margin: 0;
     padding: 0;
     width: 100%;
     border-radius:12px ;
     max-height: 500px;
+    .inventoryNumber{
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      color:var(--text-color);
+      font-size: 16px;
+      padding: 1px 5px;
+      background-color: var(--bg-color);
+      border: 1px solid var(--secondary-color);
+      border-top-left-radius: 5px;
+      border-right-width: 0px;
+    }
+    
     
     .item{
-        border:1px solid #4D4D4D;
+      position: relative;
+        border:1px solid var(--secondary-color);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -89,16 +155,3 @@ onMounted(() => {
 }
 </style>
 
-
-<!-- <VueDraggable
-                
-                class="inventory"
-                ref="el"
-               
-                v-model="store.inventoryData"
-                
-                >
-                <div class="item" v-for="i in store.inventoryData" >
-                    {{ i.content }}
-                </div>
-                </VueDraggable> -->

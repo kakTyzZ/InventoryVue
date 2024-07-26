@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang=ts>
 
 const props = defineProps({
   height: String,
@@ -38,7 +38,7 @@ const props = defineProps({
   .p {
     width: 100%;
     background: #eee;
-    background: linear-gradient(110deg, #3C3C3C, #444444, #333333);
+    background: linear-gradient(110deg, var(--skeleton-color));
     background-size: 200% 100%;
     animation: 1s shine linear infinite;
     margin: 0;

@@ -1,6 +1,11 @@
 import { defineStore } from 'pinia'
 import { ref } from "vue"
 
+interface Item {
+    id: number
+    content: string
+  }
+
 export const useInventoryStore = defineStore('inventory', () => {
     const inventoryData = ref([
         {
@@ -105,7 +110,47 @@ export const useInventoryStore = defineStore('inventory', () => {
         },
 
     ])
+    const currentElement = ref<Item | null>(null)
+    const colorState = ref("black")
 
 
-    return { inventoryData }
+
+    function deleteElement() {
+        inventoryData.value = inventoryData.value.map((el) => {
+            if (el.id === (currentElement.value as { id: number, content: string } | null)?.id) {
+                console.log(currentElement.value);
+                return { id: el.id, content: '' }
+            } else {
+                return el
+            }
+        });
+        console.log('inventoryData', inventoryData.value);
+        currentElement.value = null
+    }
+
+    function changeTheme() {
+        let bodyStyles = document.body.style;
+        if (colorState.value === "black") {
+            bodyStyles.setProperty('--secondary-color', '#142d4c');
+            bodyStyles.setProperty('--bg-color', '#ececec');
+            bodyStyles.setProperty('--primary-color', '#000000');
+            bodyStyles.setProperty('--text-color', '#000000');
+            bodyStyles.setProperty('--skeleton-color', '#36d1c4,#a0eecc,#fff2be');
+            colorState.value = 'white'
+            localStorage.setItem("colorState", JSON.stringify('black'))
+        }
+        else if (colorState.value === "white") {
+            bodyStyles.setProperty('--secondary-color', '#4D4D4D');
+            bodyStyles.setProperty('--bg-color', 'rgb(33, 30, 30)');
+            bodyStyles.setProperty('--primary-color', '#000000');
+            bodyStyles.setProperty('--text-color', '#FFFFFF');
+            bodyStyles.setProperty('--skeleton-color', '#3C3C3C, #444444, #333333');
+            localStorage.setItem("colorState", JSON.stringify('white'))
+            colorState.value = 'black'
+        }
+
+
+    }
+
+    return { inventoryData, currentElement, deleteElement, changeTheme, colorState }
 })

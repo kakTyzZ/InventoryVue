@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import Skeleton from "./Skeleton.vue"
 
 
@@ -6,7 +6,7 @@ import Skeleton from "./Skeleton.vue"
 
 
 <template>
-    <div class="container">
+    <div class="sideBarContainer">
         <img class="img" src="/pic1.png" alt="">
         <Skeleton height="26" radius="8" width="190"/>
         <div class="innerContainer">
@@ -22,7 +22,7 @@ import Skeleton from "./Skeleton.vue"
 </template>
 
 <style scoped lang="scss">
-.container{
+.sideBarContainer{
     display: flex;
     flex-direction: column;
     max-width: 236px;
@@ -30,7 +30,7 @@ import Skeleton from "./Skeleton.vue"
     height: 500px;
     padding: 18px 14px;
     border-radius: 12px;
-    border:1px solid #4D4D4D;
+    border:1px solid var(--secondary-color);
     justify-content: center;
     text-align: center;
     
